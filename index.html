@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SwingMirror</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050505;--bg2:#0a0a0a;--sidebar:#0d0d0d;--card:#141414;--card2:#1a1a1a;
+  --brd:#1e1e1e;--brd2:#2a2a2a;--accent:#00e676;--accentD:#00c864;
+  --glow:rgba(0,230,118,.15);--glow2:rgba(0,230,118,.3);
+  --red:#ff5252;--redD:rgba(255,82,82,.15);
+  --t:#f0f0f0;--t2:#888;--t3:#555;
+  --f:'DM Sans',sans-serif;--fd:'Syne',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--t);font-family:var(--f);overflow:hidden;-webkit-font-smoothing:antialiased}
+.app{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sb{width:280px;min-width:280px;background:var(--sidebar);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden}
+.sb-head{padding:20px 20px 16px;border-bottom:1px solid var(--brd)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-i{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-t{font-family:var(--fd);font-weight:700;font-size:18px;letter-spacing:-.5px}
+.logo-t span{color:var(--accent)}
+.sb-sec{padding:16px 16px 12px}
+.sec-t{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:12px;padding:0 4px}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tbtn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--t2);font-family:var(--f);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tbtn:hover{background:var(--card2);color:var(--t);border-color:var(--brd2)}
+.tbtn.on{background:var(--glow);border-color:var(--accent);color:var(--accent)}
+.tbtn.dng:hover{background:var(--redD);border-color:var(--red);color:var(--red)}
+.tbtn svg{width:16px;height:16px;flex-shrink:0}
+.tbtn.fw{grid-column:1/-1}
+.kbd{display:inline-block;padding:1px 5px;font-size:10px;background:#111;border:1px solid var(--brd);border-radius:3px;color:var(--t3);font-family:monospace;margin-left:auto}
+.crow,.wrow{display:flex;gap:6px;align-items:center;margin-top:10px;padding:0 4px}
+.crow label,.wrow label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-right:4px}
+.csw{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .15s}
+.csw:hover{transform:scale(1.15)}
+.csw.on{border-color:var(--t);box-shadow:0 0 0 2px var(--sidebar)}
+.wo{width:28px;height:28px;border-radius:50%;background:var(--card);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.wo:hover{border-color:var(--brd2)}
+.wo.on{border-color:var(--accent);background:var(--glow)}
+.wd{border-radius:50%;background:var(--t)}
+.mir-sec{padding:12px 16px;border-top:1px solid var(--brd)}
+.mir-box{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:6px}
+.mir-l{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--t2)}
+.mir-l svg{width:16px;height:16px}
+.tog{width:40px;height:22px;background:#111;border:1px solid var(--brd2);border-radius:11px;cursor:pointer;position:relative;transition:all .2s}
+.tog.on{background:var(--accent);border-color:var(--accent)}
+.tog-k{width:16px;height:16px;background:var(--t);border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .2s}
+.tog.on .tog-k{transform:translateX(18px)}
+.lib-sec{flex:1;display:flex;flex-direction:column;border-top:1px solid var(--brd);overflow:hidden;min-height:0}
+.lib-h{padding:16px 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.lib-h .sec-t{margin-bottom:0}
+.sbadge{font-size:10px;color:var(--t3);background:var(--card);padding:3px 8px;border-radius:10px;border:1px solid var(--brd)}
+.ubtn{display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 32px);margin:0 16px 12px;padding:10px;background:var(--accent);border:none;border-radius:6px;color:#000;font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.ubtn:hover{background:var(--accentD);transform:translateY(-1px)}
+.ubtn svg{width:16px;height:16px}
+.ll{flex:1;overflow-y:auto;padding:0 16px 16px;display:flex;flex-direction:column;gap:6px}
+.ll::-webkit-scrollbar{width:4px}
+.ll::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
+.li{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--card);border:1px solid var(--brd);border-radius:6px;cursor:pointer;transition:all .15s}
+.li:hover{background:var(--card2);border-color:var(--brd2)}
+.li.on{border-color:var(--accent);background:var(--glow)}
+.li-th{width:48px;height:34px;background:#111;border-radius:4px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--t3)}
+.li-info{flex:1;min-width:0}
+.li-n{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-d{font-size:10px;color:var(--t3);margin-top:2px}
+.li-x{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--t3);cursor:pointer;border-radius:4px;transition:all .15s;flex-shrink:0;opacity:0}
+.li:hover .li-x{opacity:1}
+.li-x:hover{background:var(--redD);color:var(--red)}
+.li-x svg{width:14px;height:14px}
+.li-empty{text-align:center;padding:24px 16px;color:var(--t3);font-size:12px;line-height:1.6}
+
+/* WORKSPACE */
+.ws{flex:1;display:flex;flex-direction:column;min-width:0}
+.va{flex:1;position:relative;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center}
+.es{position:absolute;inset:0;z-index:2;background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;transition:opacity .3s}
+.es.gone{opacity:0;pointer-events:none}
+.es-i{width:80px;height:80px;border-radius:20px;background:var(--card);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center}
+.es-i svg{width:36px;height:36px;color:var(--t3)}
+.es-t{font-family:var(--fd);font-size:22px;font-weight:700;letter-spacing:-.5px}
+.es-s{color:var(--t3);font-size:14px;max-width:300px;text-align:center;line-height:1.5}
+.es-b{display:flex;align-items:center;gap:10px;padding:14px 28px;background:var(--accent);border:none;border-radius:10px;color:#000;font-family:var(--f);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.es-b:hover{background:var(--accentD);transform:translateY(-2px);box-shadow:0 8px 30px var(--glow2)}
+.es-b svg{width:18px;height:18px}
+
+video#V{display:block;max-width:100%;max-height:100%;background:#000}
+video#V.flip{transform:scaleX(-1)}
+canvas#C{position:absolute;z-index:5;pointer-events:none}
+canvas#C.on{pointer-events:auto}
+canvas#C.flip{transform:scaleX(-1)}
+canvas#C.pen{cursor:crosshair}
+canvas#C.era{cursor:pointer}
+
+/* CONTROLS */
+.cb-bar{background:var(--sidebar);border-top:1px solid var(--brd);padding:12px 24px 16px;display:none;flex-direction:column;gap:10px}
+.cb-bar.vis{display:flex}
+.sr{display:flex;align-items:center;gap:12px}
+.tm{font-size:11px;color:var(--t3);font-weight:500;font-variant-numeric:tabular-nums;min-width:90px}
+.sc{flex:1;height:32px;display:flex;align-items:center;cursor:pointer;position:relative}
+.sc-trk{width:100%;height:4px;background:var(--brd2);border-radius:2px;position:relative}
+.sc-f{height:100%;background:var(--accent);border-radius:2px;width:0%}
+.sc-th{width:14px;height:14px;background:var(--accent);border-radius:50%;position:absolute;top:50%;transform:translate(-50%,-50%);left:0%;box-shadow:0 0 10px var(--glow2);opacity:0;transition:opacity .15s}
+.sc:hover .sc-th{opacity:1}
+.sc:hover .sc-trk{height:6px}
+.pr{display:flex;align-items:center;justify-content:center;gap:4px;position:relative}
+.c-b{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid transparent;border-radius:6px;color:var(--t2);cursor:pointer;transition:all .15s}
+.c-b:hover{background:var(--card);color:var(--t);border-color:var(--brd)}
+.c-b svg{width:18px;height:18px}
+.p-b{width:42px;height:42px;background:var(--accent);border:none;border-radius:50%;color:#000;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;margin:0 4px}
+.p-b:hover{background:var(--accentD);transform:scale(1.05)}
+.p-b svg{width:20px;height:20px}
+.sp{position:absolute;right:0;display:flex;align-items:center;gap:10px}
+.sp-l{font-size:11px;color:var(--t3);font-weight:500;min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;width:120px;height:4px;background:var(--brd2);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--accent);border-radius:50%;cursor:pointer;box-shadow:0 0 8px var(--glow)}
+
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s}
+.mo.show{opacity:1;pointer-events:auto}
+.md{background:var(--card);border:1px solid var(--brd2);border-radius:10px;padding:24px;max-width:360px;width:90%;transform:scale(.95);transition:transform .2s}
+.mo.show .md{transform:scale(1)}
+.md h3{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:8px}
+.md p{font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:20px}
+.md-a{display:flex;gap:8px;justify-content:flex-end}
+.mb{padding:8px 18px;border-radius:6px;font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid var(--brd2);background:var(--card);color:var(--t)}
+.mb:hover{background:var(--card2)}
+.mb.dng{background:var(--red);border-color:var(--red);color:#fff}
+.mb.dng:hover{opacity:.9}
+.tst{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--brd2);border-radius:10px;padding:12px 20px;font-size:13px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;display:flex;align-items:center;gap:8px}
+.tst.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.tst svg{width:16px;height:16px;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sb">
+  <div class="sb-head"><div class="logo"><div class="logo-i">🏌</div><div class="logo-t">Swing<span>Mirror</span></div></div></div>
+  <div class="sb-sec">
+    <div class="sec-t">Analysis Tools</div>
+    <div class="tgrid">
+      <button class="tbtn" id="bDraw" onclick="setTool('draw')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>Draw<span class="kbd">D</span></button>
+      <button class="tbtn" id="bErase" onclick="setTool('eraser')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16l9-9 8 8-4 4z"/><path d="M6.5 13.5l5-5"/></svg>Eraser<span class="kbd">E</span></button>
+      <button class="tbtn dng fw" onclick="clearAll()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14"/></svg>Clear All</button>
+    </div>
+    <div class="crow"><label>Color</label>
+      <div class="csw on" style="background:#fff" onclick="pickC(this,'#ffffff')"></div>
+      <div class="csw" style="background:#ff5252" onclick="pickC(this,'#ff5252')"></div>
+      <div class="csw" style="background:#ffeb3b" onclick="pickC(this,'#ffeb3b')"></div>
+      <div class="csw" style="background:#00e676" onclick="pickC(this,'#00e676')"></div>
+      <div class="csw" style="background:#448aff" onclick="pickC(this,'#448aff')"></div>
+      <div class="csw" style="background:#e040fb" onclick="pickC(this,'#e040fb')"></div>
+    </div>
+    <div class="wrow"><label>Width</label>
+      <div class="wo on" onclick="pickW(this,2)"><div class="wd" style="width:4px;height:4px"></div></div>
+      <div class="wo" onclick="pickW(this,4)"><div class="wd" style="width:7px;height:7px"></div></div>
+      <div class="wo" onclick="pickW(this,8)"><div class="wd" style="width:10px;height:10px"></div></div>
+    </div>
+  </div>
+  <div class="mir-sec"><div class="mir-box">
+    <div class="mir-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v14a2 2 0 002 2h3"/><path d="M16 3h3a2 2 0 012 2v14a2 2 0 01-2 2h-3"/><line x1="12" y1="1" x2="12" y2="23" stroke-dasharray="3 3"/></svg>Mirror (Flip)</div>
+    <div class="tog on" id="togMir" onclick="togMirror()"><div class="tog-k"></div></div>
+  </div></div>
+  <div class="lib-sec">
+    <div class="lib-h"><div class="sec-t">Video Library</div><span class="sbadge" id="badge">0 videos</span></div>
+    <button class="ubtn" onclick="pickFile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>Upload Video</button>
+    <div class="ll" id="libList"><div class="li-empty">No videos yet.<br>Upload your first swing video.</div></div>
+  </div>
+</aside>
+
+<main class="ws">
+  <div class="va" id="va">
+    <div class="es" id="es">
+      <div class="es-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+      <div class="es-t">Upload a Swing Video</div>
+      <div class="es-s">Upload a golf swing video and SwingMirror will flip it for left-handed analysis.</div>
+      <button class="es-b" onclick="pickFile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>Choose Video File</button>
+    </div>
+    <video id="V" playsinline></video>
+    <canvas id="C"></canvas>
+  </div>
+  <div class="cb-bar" id="cbar">
+    <div class="sr">
+      <span class="tm" id="tdisp">0:00 / 0:00</span>
+      <div class="sc" id="scrub"><div class="sc-trk"><div class="sc-f" id="sf"></div><div class="sc-th" id="sth"></div></div></div>
+    </div>
+    <div class="pr">
+      <button class="c-b" onclick="step(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
+      <button class="p-b" id="pbtn" onclick="togPlay()">
+        <svg id="iPlay" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+        <svg id="iPause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+      </button>
+      <button class="c-b" onclick="step(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></button>
+      <div class="sp">
+        <input type="range" id="spd" min="0.1" max="1" step="0.05" value="1" oninput="setSpd(this.value)">
+        <span class="sp-l" id="spdL">1.0x</span>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<input type="file" id="FI" accept="video/*" style="display:none">
+<div class="tst" id="tst"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="tstM"></span></div>
+<div class="mo" id="dMod"><div class="md"><h3>Delete Video</h3><p>Are you sure? This cannot be undone.</p><div class="md-a"><button class="mb" onclick="closeDel()">Cancel</button><button class="mb dng" onclick="doDel()">Delete</button></div></div></div>
+
+<script>
+// ═══ STATE ═══
+let tool=null, penC='#ffffff', penW=2, flip=true;
+let strokes=[], cur=null, isDraw=false, hIdx=-1;
+let activeId=null, delTarget=null;
+
+const V=document.getElementById('V');
+const C=document.getElementById('C');
+const ctx=C.getContext('2d');
+const va=document.getElementById('va');
+const es=document.getElementById('es');
+const cbar=document.getElementById('cbar');
+const FI=document.getElementById('FI');
+
+// ═══ DB ═══
+const DBN='SwingMirrorDB2',STR='vids';
+function odb(){
+  return new Promise((ok,no)=>{
+    const r=indexedDB.open(DBN,1);
+    r.onupgradeneeded=e=>{
+      if(!e.target.result.objectStoreNames.contains(STR))
+        e.target.result.createObjectStore(STR,{keyPath:'id',autoIncrement:true});
+    };
+    r.onsuccess=e=>ok(e.target.result);
+    r.onerror=e=>no(e.target.error);
+  });
+}
+async function dbPut(name,arrBuf,type){
+  const db=await odb();
+  return new Promise((ok,no)=>{
+    const tx=db.transaction(STR,'readwrite');
+    const req=tx.objectStore(STR).add({name,date:Date.now(),buf:arrBuf,type});
+    req.onsuccess=()=>ok(req.result);
+    req.onerror=()=>no(req.error);
+  });
+}
+async function dbAll(){
+  try{const db=await odb();return new Promise(ok=>{const r=db.transaction(STR).objectStore(STR).getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>ok([]);})}catch(e){return[];}
+}
+async function dbOne(id){
+  try{const db=await odb();return new Promise(ok=>{const r=db.transaction(STR).objectStore(STR).get(id);r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null);})}catch(e){return null;}
+}
+async function dbRm(id){
+  try{const db=await odb();return new Promise(ok=>{const tx=db.transaction(STR,'readwrite');tx.objectStore(STR).delete(id);tx.oncomplete=()=>ok();})}catch(e){}
+}
+
+// ═══ UPLOAD ═══
+function pickFile(){FI.click()}
+
+FI.addEventListener('change',async function(){
+  const f=this.files[0];
+  if(!f)return;
+  this.value='';
+
+  // 1) Immediately play the file — this is the most important thing
+  const url=URL.createObjectURL(f);
+  playVideo(url);
+
+  // 2) Store in background
+  try{
+    const buf=await f.arrayBuffer();
+    const id=await dbPut(f.name,buf,f.type);
+    activeId=id;
+    await refreshLib();
+  }catch(e){
+    console.warn('DB save failed:',e);
+    activeId=Date.now();
+  }
+
+  toast('Video uploaded');
+});
+
+function playVideo(url){
+  // Clear old state
+  strokes=[];cur=null;hIdx=-1;
+
+  // Show video, hide empty state
+  es.classList.add('gone');
+  cbar.classList.add('vis');
+
+  // Set source and explicitly load + show
+  V.src=url;
+  V.load();
+  V.style.display='block';
+
+  applyFlip();
+}
+
+// Video events
+V.addEventListener('loadedmetadata',function(){
+  console.log('Video loaded:',V.videoWidth,'x',V.videoHeight,'duration:',V.duration);
+  syncC();
+  updTime();
+});
+V.addEventListener('canplay',syncC);
+V.addEventListener('play',updPI);
+V.addEventListener('pause',updPI);
+V.addEventListener('timeupdate',updTime);
+V.addEventListener('error',function(e){
+  console.error('Video error:',V.error);
+  toast('Error loading video');
+});
+
+// ═══ CANVAS SYNC ═══
+function syncC(){
+  if(!V.videoWidth||!V.videoHeight)return;
+  const vr=V.getBoundingClientRect();
+  const ar=va.getBoundingClientRect();
+  C.width=V.videoWidth;
+  C.height=V.videoHeight;
+  C.style.width=vr.width+'px';
+  C.style.height=vr.height+'px';
+  C.style.left=(vr.left-ar.left)+'px';
+  C.style.top=(vr.top-ar.top)+'px';
+  redraw();
+}
+window.addEventListener('resize',()=>{if(V.videoWidth)requestAnimationFrame(syncC)});
+new ResizeObserver(()=>{if(V.videoWidth)requestAnimationFrame(syncC)}).observe(V);
+
+// ═══ COORDINATES ═══
+function gp(e){
+  const r=C.getBoundingClientRect();
+  const ex=e.touches?e.touches[0].clientX:e.clientX;
+  const ey=e.touches?e.touches[0].clientY:e.clientY;
+  // Normalize 0-1
+  const nx=(ex-r.left)/r.width;
+  const ny=(ey-r.top)/r.height;
+  // When flipped via CSS, visual left=canvas right internally
+  const x=flip?(1-nx)*C.width:nx*C.width;
+  const y=ny*C.height;
+  return{x,y};
+}
+
+// ═══ DRAWING ═══
+C.addEventListener('mousedown',dn);
+C.addEventListener('mousemove',mv);
+C.addEventListener('mouseup',up);
+C.addEventListener('mouseleave',up);
+C.addEventListener('touchstart',e=>{e.preventDefault();dn(e)},{passive:false});
+C.addEventListener('touchmove',e=>{e.preventDefault();mv(e)},{passive:false});
+C.addEventListener('touchend',up);
+
+function dn(e){
+  if(tool==='draw'){isDraw=true;cur={points:[gp(e)],color:penC,width:penW}}
+  else if(tool==='eraser'&&hIdx>=0){strokes.splice(hIdx,1);hIdx=-1;redraw();toast('Line erased')}
+}
+function mv(e){
+  if(tool==='draw'&&isDraw&&cur){cur.points.push(gp(e));redraw()}
+  else if(tool==='eraser'){
+    const p=gp(e);let bi=-1,bd=30*(C.width/(C.clientWidth||1));
+    strokes.forEach((s,i)=>{for(const pt of s.points){const d=Math.hypot(pt.x-p.x,pt.y-p.y);if(d<bd){bd=d;bi=i}}});
+    if(bi!==hIdx){hIdx=bi;redraw()}
+  }
+}
+function up(){
+  if(isDraw&&cur&&cur.points.length>1)strokes.push(cur);
+  isDraw=false;cur=null;redraw();
+}
+
+function smooth(pts){
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  if(pts.length===2){ctx.lineTo(pts[1].x,pts[1].y);return}
+  for(let i=1;i<pts.length-1;i++){
+    const mx=(pts[i].x+pts[i+1].x)/2,my=(pts[i].y+pts[i+1].y)/2;
+    ctx.quadraticCurveTo(pts[i].x,pts[i].y,mx,my);
+  }
+  ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);
+}
+
+function rS(s,hl){
+  if(s.points.length<2)return;
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  if(hl){ctx.globalAlpha=.4;ctx.strokeStyle='#ff5252';ctx.lineWidth=s.width+8;smooth(s.points);ctx.stroke()}
+  ctx.globalAlpha=1;ctx.strokeStyle=s.color;ctx.lineWidth=s.width;smooth(s.points);ctx.stroke();
+  ctx.restore();
+}
+
+function redraw(){
+  ctx.clearRect(0,0,C.width,C.height);
+  strokes.forEach((s,i)=>rS(s,tool==='eraser'&&i===hIdx));
+  if(cur&&cur.points.length>1)rS(cur);
+}
+
+function clearAll(){if(!strokes.length)return;strokes=[];redraw();toast('Drawings cleared')}
+
+// ═══ TOOLS ═══
+function setTool(t){
+  tool=tool===t?null:t;hIdx=-1;
+  C.classList.toggle('on',tool!==null);
+  C.classList.toggle('pen',tool==='draw');
+  C.classList.toggle('era',tool==='eraser');
+  document.getElementById('bDraw').classList.toggle('on',tool==='draw');
+  document.getElementById('bErase').classList.toggle('on',tool==='eraser');
+  redraw();
+}
+function pickC(el,c){penC=c;document.querySelectorAll('.csw').forEach(s=>s.classList.remove('on'));el.classList.add('on')}
+function pickW(el,w){penW=w;document.querySelectorAll('.wo').forEach(s=>s.classList.remove('on'));el.classList.add('on')}
+
+// ═══ MIRROR ═══
+function togMirror(){flip=!flip;document.getElementById('togMir').classList.toggle('on',flip);applyFlip()}
+function applyFlip(){V.classList.toggle('flip',flip);C.classList.toggle('flip',flip)}
+
+// ═══ PLAYBACK ═══
+function togPlay(){if(!V.src)return;V.paused?V.play():V.pause()}
+function updPI(){
+  document.getElementById('iPlay').style.display=V.paused?'':'none';
+  document.getElementById('iPause').style.display=V.paused?'none':'';
+}
+function step(d){V.pause();V.currentTime=Math.max(0,Math.min(V.duration||0,V.currentTime+d/30))}
+function setSpd(v){V.playbackRate=parseFloat(v);document.getElementById('spdL').textContent=parseFloat(v).toFixed(1)+'x'}
+function fmt(s){return isNaN(s)?'0:00':Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
+function updTime(){
+  document.getElementById('tdisp').textContent=fmt(V.currentTime)+' / '+fmt(V.duration);
+  const p=V.duration?(V.currentTime/V.duration)*100:0;
+  document.getElementById('sf').style.width=p+'%';
+  document.getElementById('sth').style.left=p+'%';
+}
+
+// Scrub
+let scr=false;const SC=document.getElementById('scrub');
+function doScr(e){
+  const r=SC.getBoundingClientRect();
+  const x=e.touches?e.touches[0].clientX:e.clientX;
+  V.currentTime=Math.max(0,Math.min(1,(x-r.left)/r.width))*(V.duration||0);
+  updTime();
+}
+SC.addEventListener('mousedown',e=>{scr=true;doScr(e)});
+document.addEventListener('mousemove',e=>{if(scr)doScr(e)});
+document.addEventListener('mouseup',()=>scr=false);
+SC.addEventListener('touchstart',e=>{scr=true;doScr(e)},{passive:false});
+document.addEventListener('touchmove',e=>{if(scr)doScr(e)},{passive:false});
+document.addEventListener('touchend',()=>scr=false);
+
+// ═══ LIBRARY ═══
+async function refreshLib(){
+  const el=document.getElementById('libList');
+  const recs=await dbAll();
+  document.getElementById('badge').textContent=recs.length+' video'+(recs.length!==1?'s':'');
+  if(!recs.length){el.innerHTML='<div class="li-empty">No videos yet.<br>Upload your first swing video.</div>';return}
+  el.innerHTML='';
+  recs.slice().reverse().forEach(r=>{
+    const d=document.createElement('div');
+    d.className='li'+(r.id===activeId?' on':'');
+    d.dataset.id=r.id;
+    const dt=new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    d.innerHTML=`<div class="li-th">🎥</div><div class="li-info"><div class="li-n">${esc(r.name)}</div><div class="li-d">${dt}</div></div><button class="li-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    d.addEventListener('click',e=>{if(e.target.closest('.li-x'))return;loadLib(r.id)});
+    d.querySelector('.li-x').addEventListener('click',e=>{e.stopPropagation();delTarget=r.id;document.getElementById('dMod').classList.add('show')});
+    el.appendChild(d);
+  });
+}
+
+async function loadLib(id){
+  const r=await dbOne(id);
+  if(r&&r.buf){
+    const blob=new Blob([r.buf],{type:r.type||'video/mp4'});
+    const url=URL.createObjectURL(blob);
+    activeId=id;
+    playVideo(url);
+    document.querySelectorAll('.li').forEach(el=>el.classList.toggle('on',Number(el.dataset.id)===id));
+  }else toast('Could not load video');
+}
+
+function closeDel(){document.getElementById('dMod').classList.remove('show');delTarget=null}
+async function doDel(){
+  if(delTarget==null)return;
+  await dbRm(delTarget);
+  if(delTarget===activeId){
+    V.pause();V.removeAttribute('src');V.load();V.style.display='';
+    activeId=null;strokes=[];
+    es.classList.remove('gone');cbar.classList.remove('vis');
+  }
+  closeDel();await refreshLib();toast('Video deleted');
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+// ═══ TOAST ═══
+let tt;function toast(m){const t=document.getElementById('tst');document.getElementById('tstM').textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2500)}
+
+// ═══ KEYBOARD ═══
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key===' '){e.preventDefault();togPlay()}
+  if(e.key==='ArrowLeft'){e.preventDefault();step(-1)}
+  if(e.key==='ArrowRight'){e.preventDefault();step(1)}
+  if(e.key==='d'||e.key==='D')setTool('draw');
+  if(e.key==='e'||e.key==='E')setTool('eraser');
+  if(e.key==='m'||e.key==='M')togMirror();
+  if(e.key==='Escape')setTool(null);
+});
+
+// ═══ INIT ═══
+refreshLib();
+</script>
+</body>
+</html>
